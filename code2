@@ -1,0 +1,45 @@
+# Define membership functions for temperature and power levels
+def fuzzy_membership_temperature(temperature):
+    membership = {
+        'cold': max(min((50 - temperature) / 50, 1), 0),
+        'warm': max(min((temperature - 0) / 50, 1), 0) if temperature <= 50 else max(min((100 - temperature) / 50, 1), 0),
+        'hot': max(min((temperature - 50) / 50, 1), 0)
+    }
+    return membership
+
+def fuzzy_membership_power(power):
+    membership = {
+        'low': max(min((50 - power) / 50, 1), 0),
+        'medium': max(min((power - 0) / 50, 1), 0) if power <= 50 else max(min((100 - power) / 50, 1), 0),
+        'high': max(min((power - 50) / 50, 1), 0)
+    }
+    return membership
+
+# Define fuzzy rules for power output based on temperature
+def fuzzy_rule_base(temperature_membership):
+    power_membership = {}
+    power_membership['high'] = temperature_membership['cold']
+    power_membership['medium'] = temperature_membership['warm']
+    power_membership['low'] = temperature_membership['hot']
+    return power_membership
+
+# Defuzzification process to get a crisp value from fuzzy sets
+def defuzzify(power_membership):
+    values = {'low': 0, 'medium': 50, 'high': 100}
+    numerator = sum(value * values[key] for key, value in power_membership.items())
+    denominator = sum(power_membership.values())
+    return numerator / denominator if denominator != 0 else 0
+
+# Main fuzzy controller function
+def fuzzy_controller(temperature):
+    membership_temperature = fuzzy_membership_temperature(temperature)
+    power_membership = fuzzy_rule_base(membership_temperature)
+    power_level = defuzzify(power_membership)
+    return power_level
+
+# Example usage
+if __name__ == "__main__":
+    ambient_temperature = 70
+    power_level = fuzzy_controller(ambient_temperature)
+    print("Ambient Temperature:", ambient_temperature)
+    print("Calculated Power Level:", power_level)
